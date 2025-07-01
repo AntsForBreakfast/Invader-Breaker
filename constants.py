@@ -1,0 +1,2 @@
+DISPLAY_SIZE = (320, 180)
+FPS = 60
