@@ -29,7 +29,7 @@ class World:
         return self._entities.get(entity_id, {})
 
     def query_components(
-        self, components_type: list[type[Component]]
+        self, components_type: Iterable[type[Component]]
     ) -> list[dict[type[Component], Component]]:
         comp_amount = len(components_type)
         query = []
@@ -42,5 +42,21 @@ class World:
 
             if len(comp) == comp_amount:
                 query.append(comp)
+
+        return query
+
+    def query_components_from(
+        self, entity_id: int, components_type: Iterable[type[Component]]
+    ) -> list[dict[type[Component], Component]]:
+        comp_amount = len(components_type)
+        query = []
+        comp = {}
+
+        for comp_type in components_type:
+            if comp_type in self._entities[entity_id]:
+                comp[comp_type] = self._entities[entity_id][comp_type]
+
+        if len(comp) == comp_amount:
+            query.append(comp)
 
         return query

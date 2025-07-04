@@ -5,7 +5,7 @@ import pygame
 from base.observer import Observer
 
 
-class Quit(Observer[pygame.Event]):
+class QuitObserver(Observer[pygame.Event]):
     def update(self, event: pygame.Event) -> None:
         if (
             event.type == pygame.QUIT

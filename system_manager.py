@@ -11,6 +11,6 @@ class SystemManager:
     def add_system(self, system: System) -> None:
         self._systems[type(system)] = system
 
-    def update(self, world: World, dt: float) -> None:
+    def update(self, world: World, delta_time: float) -> None:
         for system in self._systems.values():
-            system.update(world, dt)
+            system.update(world, delta_time)
