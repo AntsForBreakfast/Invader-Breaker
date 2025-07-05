@@ -4,11 +4,13 @@ from world import World
 from base.observer import Observer
 from components.velocity import Velocity
 from components.speed import Speed
+from tags import Controllable
 
-class PlatformMovementObserver(Observer[pygame.Event]):
-    def __init__(self, world:World) -> None:
+
+class MovementObserver(Observer[pygame.Event]):
+    def __init__(self, world: World) -> None:
         super().__init__()
-        self.world:World = world
+        self.world: World = world
         self._pressed: dict[int, bool] = {
             pygame.K_w: False,
             pygame.K_s: False,
@@ -17,7 +19,7 @@ class PlatformMovementObserver(Observer[pygame.Event]):
         }
 
     def update(self, event: pygame.Event) -> None:
-        for components in self.world.query_components((Velocity, Speed)):
+        for components in self.world.query_components((Velocity, Speed, Controllable)):
             velocity, speed = components[Velocity], components[Speed]
 
             if event.type == pygame.KEYDOWN:
@@ -51,5 +53,5 @@ class PlatformMovementObserver(Observer[pygame.Event]):
                     self._pressed[pygame.K_w] = False
 
                 if event.key == pygame.K_s and not self._pressed[pygame.K_s]:
-                    velocity.y = 0 
+                    velocity.y = 0
                     self._pressed[pygame.K_s] = False

@@ -10,9 +10,12 @@ from components.color import Color
 from components.velocity import Velocity
 from components.speed import Speed
 from components.boundary import Boundary
-from systems.movement import PlatformMovementSystem
-from systems.boundary import PlatformBoundarySystem
-from observers.movement import PlatformMovementObserver
+from components.path import Path
+from tags import Controllable
+from systems.movement import MovementSystem
+from systems.boundary import BoundarySystem
+from systems.path import PathSystem
+from observers.movement import MovementObserver
 from observers.quit import QuitObserver
 
 from constants import (
@@ -37,7 +40,7 @@ class Game:
 
         # Events
         self.event_listener.add_observer(QuitObserver())
-        self.event_listener.add_observer(PlatformMovementObserver(self.world))
+        self.event_listener.add_observer(MovementObserver(self.world))
 
         # Entities
         self.aliens = [
@@ -47,43 +50,61 @@ class Game:
         self.platform = self.world.new_entity()
 
         # Systems
-        self.ecs.add_system(PlatformMovementSystem(self.platform))
-        self.ecs.add_system(PlatformBoundarySystem(self.platform))
+        self.ecs.add_system(MovementSystem())
+        self.ecs.add_system(BoundarySystem())
+        self.ecs.add_system(PathSystem())
 
         # Components
-        alien_size = Size(5, 5)
-        alien_color = Color(50, 50, 50)
-        alien_velocity = Velocity(0, 0)
-        alien_speed = Speed(50, 50)
-        # alien_path = Path(
-
-        # )
-        platform_position = Position(self.screen.get_width() / 2 - 50, 165)
-        platform_size = Size(100, 5)
-        platform_velocity = Velocity(0, 0)
-        platform_color = Color(100, 100, 100)
-        platform_speed = Speed(100, 0)
-        platform_boundary = Boundary(5, DISPLAY_SIZE[0] - 105, 0, 0)
-
         for i, alien_row in enumerate(self.aliens, 1):
             for j, alien_id in enumerate(alien_row, 1):
-                x = 50 * j if i % 2 != 0 else -25 + 50 * j
-                y = 15 * i
-                alien_position = Position(x, y)
+                pos_y = 15 * i
 
+                if i % 2 != 0:
+                    pos_x = 50 * j
+                    speed = Speed(30, 30)
+                    path = Path(
+                        (
+                            ((0, 1), (pos_x, pos_y + 5)),
+                            ((-1, 0), (pos_x-5 , pos_y + 5)),
+                            ((0, -1), (pos_x-5, pos_y)),
+                            ((1, 0), (pos_x, pos_y)),
+                        )
+                    )
+                else:
+                    pos_x = -25 + 50 * j
+                    speed = Speed(20, 20)
+                    path = Path(
+                        (
+                            ((1, 0), (pos_x + 35, pos_y)),
+                            ((0, 1), (pos_x + 35, pos_y + 35)),
+                            ((-1, 0), (pos_x, pos_y + 35)),
+                            ((0, -1), (pos_x, pos_y)),
+                        )
+                    )
+
+                
                 self.world.add_components(
-                    alien_id, [alien_position, alien_velocity, alien_speed, alien_size, alien_color]
+                    alien_id,
+                    (
+                        Position(pos_x, pos_y),
+                        Velocity(0, 0),
+                        speed,
+                        Size(5, 5),
+                        Color(50, 50, 50),
+                        path,
+                    ),
                 )
 
         self.world.add_components(
             self.platform,
             [
-                platform_position,
-                platform_size,
-                platform_velocity,
-                platform_color,
-                platform_speed,
-                platform_boundary,
+                Position(self.screen.get_width() / 2 - 50, 165),
+                Size(100, 5),
+                Velocity(0, 0),
+                Color(100, 100, 100),
+                Speed(100, 0),
+                Boundary(5, DISPLAY_SIZE[0] - 105, 0, 0),
+                Controllable(),
             ],
         )
 
